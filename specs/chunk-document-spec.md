@@ -116,11 +116,12 @@ handle these cases better, at the cost of more implementation complexity.
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+149 chunks stored.
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+Nothing suprising. Only good to know the fact that the _collection.query() returns nested lists (one per query), so we'll want index [0] to get the actual results. Also learned the "persistent" ChromaDB.
+ 
 ```
