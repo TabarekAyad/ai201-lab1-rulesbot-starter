@@ -74,7 +74,7 @@ def retrieve(query, n_results=N_RESULTS):
         include=["documents", "metadatas", "distances"],
     )
 
-    chunks = [
+    return [
         {
             "text": results["documents"][0][i],
             "game": results["metadatas"][0][i]["game"],
@@ -83,8 +83,3 @@ def retrieve(query, n_results=N_RESULTS):
         for i in range(len(results["documents"][0]))
         if results["distances"][0][i] <= 0.5
     ]
-
-    for chunk in chunks:
-        print(f"[{chunk['game']}] (dist: {chunk['distance']:.3f}) {chunk['text'][:80]}...")
-
-    return chunks

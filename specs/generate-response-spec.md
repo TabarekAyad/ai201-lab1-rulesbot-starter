@@ -42,7 +42,20 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *How will you format the retrieved chunks before passing them to the LLM? Describe the structure — not the code. Consider: will you label chunks by game? Include distance scores? Separate chunks with delimiters?*
 
 ```
-[your answer here]
+Each chunk is formatted as a Markdown header with the game name, followed by the
+chunk text:
+
+  ## Catan
+  <chunk text>
+
+  ## Pandemic
+  <chunk text>
+
+Chunks are separated by a blank line. The Markdown header makes the source
+visually distinct so the model can correctly attribute its answer to the right
+game. Distance scores are not included — they are an internal retrieval metric
+already used for filtering in retrieve() and have no meaningful interpretation
+for the LLM.
 ```
 
 ---
@@ -52,7 +65,16 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *Write the exact system prompt instruction you will use to prevent the model from answering beyond the retrieved text. This is the most important design decision in this function.*
 
 ```
-[your answer here]
+You are a board game rules assistant. Answer ONLY using the rule text provided in the context below.
+
+Present your answer in this format: "Here is what I found in the [Game Name] rulebook: [exact quote from context]". Use the game name from the context header (## GameName). Do not restate or paraphrase the quote — let it speak for itself. Every sentence in your response must come directly from the provided context — nothing else.
+
+Rules:
+- Do not use any knowledge of board games from your training data.
+- Do not complete, infer, or extend beyond what the retrieved text explicitly states.
+- Do not resolve ambiguous language using knowledge of similar games.
+- If the context does not contain a direct answer, respond with exactly: "That rule isn't in the loaded rulebooks. Try rephrasing your question or asking about a specific game."
+- When in doubt, use the fallback. A confident wrong answer is worse than an honest I don't know.
 ```
 
 ---
@@ -104,14 +126,18 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 **Test query and response:**
 
 ```
-Query: [your test query]
-Response: [abbreviated response]
-Correctly grounded? [yes / no]
-Cited the right game? [yes / no]
+Query: What happens when you run out of disease cubes in Pandemic?
+Response: Here is what I found in the rulebook: "players lose immediately if: ...
+          any color of disease cubes runs out when a cube must be placed"
+Correctly grounded? Yes — answer comes directly from the retrieved chunk with no added knowledge.
+Cited the right game? Yes — Pandemic chunks were retrieved and the answer is specific to Pandemic.
 ```
 
 **One thing you changed from your original spec after seeing the actual output:**
 
 ```
-[your answer here]
+Changed the response format from "quote first, then restate the answer" to
+"Here is what I found in the rulebook: [quote]" — the original format was
+redundant since the quote and the answer said the same thing. The new format
+lets the quote speak for itself without repetition.
 ```

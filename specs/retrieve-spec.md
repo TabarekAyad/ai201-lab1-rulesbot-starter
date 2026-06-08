@@ -122,14 +122,21 @@ Tradeoffs:
 **Test query and top result returned:**
 
 ```
-Query: [your test query]
-Top result game: [game name]
-Distance score: [score]
-Does it make sense? [yes / no / explain]
+Query: How do you win?
+Top result game: none — returned []
+Distance score: all chunks scored above 0.5, filtered out
+Does it make sense? Yes. The query is too generic — no game name or specific rule
+language to anchor the embedding, so it floated equidistant from every rulebook
+and matched nothing closely enough to pass the threshold.
 ```
 
 **One thing about the query results that surprised you:**
 
 ```
-[your answer here]
+Even though Catan, Monopoly, Pandemic, and Ticket to Ride all have explicit winning
+condition chunks in the collection, none of them scored under 0.5 for this query.
+The embedding model had no signal to prefer one game's winning rule over another,
+so all distances were high. Adding a game name (e.g. "How do you win in Catan?")
+immediately produces strong matches — showing how much specificity matters for
+semantic retrieval.
 ```

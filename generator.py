@@ -35,5 +35,33 @@ def generate_response(query, retrieved_chunks):
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
 
-    # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    context = "\n\n".join(
+        f"## {chunk['game']}\n{chunk['text']}" for chunk in retrieved_chunks
+    )
+
+    system_message = (
+        "You are a board game rules assistant. Answer ONLY using the rule text provided in the context below.\n\n"
+        "Present your answer in this format: \"Here is what I found in the [Game Name] rulebook: [exact quote from context]\". "
+        "Use the game name from the context header (## GameName). "
+        "Do not restate or paraphrase the quote — let it speak for itself. "
+        "Every sentence in your response must come directly from the provided context — nothing else.\n\n"
+        "Rules:\n"
+        "- Do not use any knowledge of board games from your training data.\n"
+        "- Do not complete, infer, or extend beyond what the retrieved text explicitly states.\n"
+        "- Do not resolve ambiguous language using knowledge of similar games.\n"
+        "- If the context does not contain a direct answer, respond with exactly: "
+        "\"That rule isn't in the loaded rulebooks. Try rephrasing your question or asking about a specific game.\"\n"
+        "- When in doubt, use the fallback. A confident wrong answer is worse than an honest I don't know."
+    )
+
+    user_message = f"Here are the relevant rule excerpts:\n\n{context}\n\nQuestion: {query}"
+
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ],
+    )
+
+    return response.choices[0].message.content
